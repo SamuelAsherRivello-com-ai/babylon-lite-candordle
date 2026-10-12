@@ -1,5 +1,12 @@
 export const WHATS_NEW = [
   {
+    version: "V 0.0.12",
+    items: [
+      "Candordle now stays in a tall, focused portrait game window on every screen.",
+      "The board, keyboard, and menus scale together without switching to a wide layout.",
+    ],
+  },
+  {
     version: "V 0.0.11",
     items: [
       "Meet Candordle, with a fresh start menu and bigger mobile controls.",
