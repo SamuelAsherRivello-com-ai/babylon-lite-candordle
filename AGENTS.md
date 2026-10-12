@@ -174,6 +174,14 @@ Do not create a pull request unless the user explicitly asks for one in the
 current request. A push, commit, or completed template/OpenSpec workflow does
 not imply approval to create a pull request.
 
+## Release notes
+
+Every release MUST update the player-facing `wordle-clone/src/whats-new.ts`
+before it is committed, pushed, or published. Finalize the pending entry with
+the release version and concise, friendly bullets describing only the changes
+that matter to players. Do not publish a release with a stale or missing
+What's New entry.
+
 ## TypeScript and unattended verification
 
 All resulting apps and games must retain strict TypeScript for source, tests,

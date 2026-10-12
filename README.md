@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 
-# Wordle Clone
+# Candordle
 
 An original, tactile five-letter word game with accessible controls, local progress, and three replayable puzzle modes.
 
@@ -34,7 +34,7 @@ Persist local progress and settings. Build with React, TypeScript, Vite, and Bab
 
 ## Live Demo
 
-- [Wordle Clone](https://samuelasherrivello.github.io/babylon-lite-wordle-game-clone/)
+- [Play Candordle](https://samuelasherrivello.github.io/babylon-lite-wordle-game-clone/)
 
 ## Images
 
@@ -68,7 +68,7 @@ Install dependencies, run the browser game locally, and use the verified command
 
 ## Project Details
 
-Wordle Clone is a responsive, portrait-first browser puzzle with local-only data and an original warm-paper, aqua, coral, and violet visual system.
+Candordle is a responsive, portrait-first browser puzzle with local-only data and an original warm-paper puzzle style.
 
 ### 🤖 AI
 
@@ -93,10 +93,10 @@ Wordle Clone is a responsive, portrait-first browser puzzle with local-only data
 
 ### 🎮 Play Details
 
-- Classic provides six guesses; Speed Wordle adds a 90-second countdown; Two-Guess Challenge ends after two guesses.
+- Classic provides six guesses; Speed Wordle adds a visible 60-second countdown; Two-Guess Challenge ends after two guesses and starts with an answer-specific challenge clue.
 - A build-time MIT English-word source is trimmed to 12,653 five-letter words only; ordinary plurals, regular past tenses, `BROKE`, and `AROSE` are accepted.
 - Optional themes, crossword-style clues, and placed-letter progress unlock one non-spoiler hint.
-- Settings persist locally and include hard mode, sound, reduced motion, and color-blind-friendly tile states.
+- Settings persist locally and include hard mode, optional clues, sound, personal progress, and release notes.
 
 ## Credits
 
