@@ -16,6 +16,7 @@
   },
   "include": [
     "vite.config.ts",
+    "playwright.config.ts",
     "scripts/**/*.ts",
     "wordle-clone/test/**/*.ts",
     "wordle-clone/test/**/*.tsx"

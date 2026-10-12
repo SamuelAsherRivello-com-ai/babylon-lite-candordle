@@ -10,7 +10,8 @@ export const ANSWERS: Record<Theme, string[]> = {
   nature: ["MAPLE", "RIVER", "CORAL", "OCEAN", "MOSSY"],
   food: ["BREAD", "OLIVE", "PEACH", "GRAPE", "HONEY"],
 };
-export const GUESSES = new Set([...Object.values(ANSWERS).flat(), "BROKE", "TRIED", "CARED", "BAKED", "HOUSES", "PLUMS", "ROSES", "SHEEP", "STONE", "TEARS", "SPORE", "CROWD"]);
+import { FIVE_LETTER_WORDS } from "./dictionary.ts";
+export const GUESSES = new Set([...FIVE_LETTER_WORDS, ...Object.values(ANSWERS).flat()]);
 export const MODES: Record<Mode, { label: string; attempts: number; seconds: number | null }> = {
   classic: { label: "Classic", attempts: 6, seconds: null }, speed: { label: "Speed Wordle", attempts: 6, seconds: 90 }, two: { label: "Two-Guess Challenge", attempts: 2, seconds: null },
 };

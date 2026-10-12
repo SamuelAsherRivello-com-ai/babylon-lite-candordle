@@ -94,7 +94,7 @@ Wordle Clone is a responsive, portrait-first browser puzzle with local-only data
 ### 🎮 Play Details
 
 - Classic provides six guesses; Speed Wordle adds a 90-second countdown; Two-Guess Challenge ends after two guesses.
-- The curated common-word policy includes ordinary plurals, regular past tenses, `BROKE`, and `AROSE`.
+- A build-time MIT English-word source is trimmed to 12,653 five-letter words only; ordinary plurals, regular past tenses, `BROKE`, and `AROSE` are accepted.
 - Optional themes, crossword-style clues, and placed-letter progress unlock one non-spoiler hint.
 - Settings persist locally and include hard mode, sound, reduced motion, and color-blind-friendly tile states.
 
