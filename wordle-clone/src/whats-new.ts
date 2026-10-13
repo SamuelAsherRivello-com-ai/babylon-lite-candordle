@@ -1,9 +1,20 @@
 export const WHATS_NEW = [
   {
+    version: "V 0.0.13",
+    items: [
+      "Keep round details together in a dedicated info bar, while the game area stays focused on the tiles.",
+      "Follow your current turn in Classic and Two-Guess Challenge, or watch the countdown in Speed Wordle.",
+      "Play more comfortably on narrow screens with a centered board, consistent tile spacing, and clearer keyboard controls.",
+    ],
+  },
+  {
     version: "V 0.0.12",
     items: [
-      "Candordle now stays in a tall, focused portrait game window on every screen.",
-      "The board, keyboard, and menus scale together without switching to a wide layout.",
+      "Candordle now uses a focused portrait layout, with a refreshed board, keyboard, and menus that scale together.",
+      "Start from a new welcome screen that shows today's plays, then choose a category with your own shuffled, no-repeat word order.",
+      "Open My Progress to see your streaks, wins, fastest Speed Wordle time, and Classic Mode category progress.",
+      "Choose optional clues or hard mode, hear new game sounds, and enjoy tile reveals, win confetti, and a clearer end-of-round result.",
+      "Read these release notes any time from Settings.",
     ],
   },
   {
@@ -29,3 +40,4 @@ export const WHATS_NEW = [
     ],
   },
 ];
+

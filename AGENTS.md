@@ -168,6 +168,15 @@ external skill unless the user or repository workflow calls for it. When a
 project-local skill is present, follow its instructions only after confirming
 that it applies to the current task.
 
+## GitHub connector authorization
+
+- The GitHub connector is the authorized identity for this project. Use its
+  repository, commit, release, and workflow capabilities for GitHub work.
+- Do not ask the user to authenticate the GitHub CLI or provide a `GH_TOKEN`
+  when the connector can perform the required operation.
+- Treat GitHub CLI authentication as optional local tooling, not a prerequisite
+  for GitHub operations available through the connector.
+
 ## Pull request workflow
 
 Do not create a pull request unless the user explicitly asks for one in the
@@ -194,3 +203,4 @@ stealing desktop focus.
 ## Required language for every template use
 
 Every use of this template, including local copies, generated repositories, apps, games and later updates, MUST use strict TypeScript for all authored source, tests, executable configuration and tooling. Human contributors and AI agents must preserve this policy. Generated JavaScript output, third-party dependencies and native shell scripts remain permitted; do not replace authored TypeScript with JavaScript or weaken compiler/source-coverage gates.
+
