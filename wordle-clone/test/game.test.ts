@@ -1,9 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GUESSES, evaluate, hardModeMessage, isValidWord, makeRound, status } from "../src/game/engine.ts";
+import { ANSWERS, DEFAULT_STATS, GUESSES, MODES, clue, evaluate, hardModeMessage, hint, isValidWord, makeRound, orderedAnswers, status, updateStats } from "../src/game/engine.ts";
 const commonWords = ["HAPPY","ABOUT","ABOVE","ADEPT","AFTER","AGAIN","ALIVE","APPLE","BEACH","BRAIN","BREAD","BRING","BROKE","CARRY","CHAIR","CHILD","CLEAN","CLOUD","DANCE","DREAM","EARTH","ENJOY","EVERY","FIRST","FRUIT","GLASS","GRASS","GREEN","GROUP","HONEY","HORSE","HOUSE","IMAGE","JUICE","LEARN","LEMON","LIGHT","MONEY","MUSIC","NIGHT","OCEAN","PARTY","PEACE","PHONE","PLANT","RIVER","SHEEP","SMILE","STONE","TABLE","WATER"];
 test("word policy includes AROSE, BROKE, plurals and -ed",()=>{ for(const word of ["AROSE","BROKE","ROSES","BAKED"]) assert.ok(isValidWord(word)); assert.ok(GUESSES.has("AROSE")); });
 test("evaluation handles duplicate letters",()=>assert.deepEqual(evaluate("AROSE","SHEEP"),["present","absent","present","absent","absent"]));
 test("mode limits and timer end rounds",()=>{ const round={...makeRound("two","everyday"),guesses:["CRANE","SLATE"]};assert.equal(status(round),"lost");const speed={...makeRound("speed","everyday",0),deadline:0};assert.equal(status(speed,1),"lost"); });
+test("each answer has fresh clue and hint copy, including OLIVE",()=>{ const olive=makeRound("classic","food",0,1); const bread=makeRound("classic","food",0,0); assert.match(clue(olive),/martini/i); assert.notEqual(clue(olive),clue(bread)); assert.notEqual(hint(olive),hint(bread)); });
+test("Speed Wordle is a visible one-minute challenge",()=>assert.equal(MODES.speed.seconds,60));
+test("Speed Wordle starts its timer on the first submitted guess",()=>assert.equal(makeRound("speed","everyday",0).deadline,null));
+test("a faster Speed Wordle win replaces the personal best",()=>{const first=updateStats(DEFAULT_STATS,"won",42);assert.equal(first.bestSpeedSeconds,42);assert.equal(updateStats(first,"won",51).bestSpeedSeconds,42);assert.equal(updateStats(first,"won",37).bestSpeedSeconds,37);});
 test("hard mode preserves discovered exact positions",()=>{const round={...makeRound("classic","everyday"),answer:"AROSE",guesses:["CRANE"]};assert.throws(()=>hardModeMessage(round,"SPORE"));});
+test("South Africa category has 100 valid five-letter answers",()=>{const answers=ANSWERS.southAfrica;assert.equal(answers.length,100);for(const answer of answers)assert.equal(isValidWord(answer),true,answer);});
+test("Psychology category has 100 valid five-letter answers",()=>{const answers=ANSWERS.psychology;assert.equal(answers.length,100);for(const answer of answers)assert.equal(isValidWord(answer),true,answer);});
+test("every category supplies 100 valid five-letter Candordles",()=>{for(const answers of Object.values(ANSWERS)){assert.equal(answers.length,100);for(const answer of answers)assert.equal(isValidWord(answer),true,answer);}});
+test("a seed creates a stable, non-repeating category order",()=>{const first=orderedAnswers("psychology",12345);assert.deepEqual(first,orderedAnswers("psychology",12345));assert.equal(new Set(first).size,ANSWERS.psychology.length);assert.notDeepEqual(first,orderedAnswers("psychology",67890));});
 test("extensive dictionary accepts HAPPY and 50 common five-letter words",()=>{ for (const word of commonWords) assert.equal(isValidWord(word),true,word); });
