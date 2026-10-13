@@ -2,7 +2,6 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react"
 import { ANSWERS, DEFAULT_SETTINGS, DEFAULT_STATS, MODES, createCategoryProgress, createSeed, type CategoryProgress, type Mode, type Round, type Settings, type Statistics, type Theme, clue, evaluate, hardModeMessage, hint, isValidWord, makeRound, status, updateStats } from "./game/engine.ts";
 import { playCelebration, playLoss, playTileReveal } from "./game/audio.ts";
 import { appendSessionEvent, readSessionHistory, SESSION_HISTORY_KEY, type SessionEventType } from "./game/session-history.ts";
-import { WHATS_NEW } from "./whats-new.ts";
 
 const KEY = "wordle-clone.v1";
 const VERSION_RELOAD_KEY = "wordle-clone.v1.version-reload";
@@ -17,6 +16,7 @@ const TILT_STAGGER_MS = 200;
 const TILT_DURATION_MS = 520;
 const ROUND_COMPLETE_EARLY_MS = 2000;
 type DailyPlays = { date: string; count: number };
+type ReleaseNotes = { version: string; items: string[] }[];
 type Saved = { round: Round; settings: Settings; stats: Statistics; seed: number; progress: Record<Theme, CategoryProgress>; dailyPlays: DailyPlays };
 const CATEGORY_LABELS: Record<Theme, string> = { everyday: "Everyday", nature: "Nature", food: "Food", southAfrica: "South Africa", psychology: "Psychology" };
 function todayKey() {
@@ -28,6 +28,13 @@ function retainedTileIndices(round: Round) {
 }
 function createSessionId() {
   return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+function isReleaseNotes(value: unknown): value is ReleaseNotes {
+  return Array.isArray(value) && value.every((release) => {
+    if (!release || typeof release !== "object") return false;
+    const candidate = release as { version?: unknown; items?: unknown };
+    return typeof candidate.version === "string" && Array.isArray(candidate.items) && candidate.items.every((item) => typeof item === "string");
+  });
 }
 
 function load(): Saved {
@@ -65,6 +72,8 @@ export function App() {
   const [timerStoppedAt, setTimerStoppedAt] = useState<number | null>(null);
   const [celebration, setCelebration] = useState(0);
   const [confettiOrigins, setConfettiOrigins] = useState<Array<{ x: number; y: number }>>([]);
+  const [displayVersion, setDisplayVersion] = useState(__APP_VERSION__);
+  const [whatsNew, setWhatsNew] = useState<ReleaseNotes>([]);
   const completedRoundRef = useRef<string | null>(null);
   const [startOpen, setStartOpen] = useState(() => !saved.round.started && saved.round.guesses.length === 0);
   const [settingsFromStart, setSettingsFromStart] = useState(false);
@@ -91,6 +100,7 @@ export function App() {
       try {
         const response = await fetch(`${import.meta.env.BASE_URL}version.txt`, { cache: "no-store" });
         const deployedVersion = response.ok ? (await response.text()).trim().replace(/^version=/, "") : "";
+        if (deployedVersion) setDisplayVersion(deployedVersion);
         if (deployedVersion && deployedVersion !== __APP_VERSION__ && sessionStorage.getItem(VERSION_RELOAD_KEY) !== deployedVersion) {
           sessionStorage.setItem(VERSION_RELOAD_KEY, deployedVersion);
           window.location.reload();
@@ -98,6 +108,16 @@ export function App() {
       } catch {}
     };
     void refreshForNewRelease();
+  }, []);
+  useEffect(() => {
+    const loadChangelog = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}changelog.json`, { cache: "no-store" });
+        const value: unknown = response.ok ? await response.json() : [];
+        if (isReleaseNotes(value)) setWhatsNew(value);
+      } catch {}
+    };
+    void loadChangelog();
   }, []);
   useEffect(() => { const interval = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(interval); }, []);
   const recordSessionEvent = (type: SessionEventType, round?: Round, outcome?: "won" | "lost") => {
@@ -245,7 +265,7 @@ export function App() {
       const index = (tileIndex * 3) + particleIndex;
       return <span key={`${celebration}-${index}`} style={{ "--left": `${origin.x}px`, "--top": `${origin.y}px`, "--delay": `${particleIndex * 28}ms`, "--drift": `${((index * 53) % 240) - 120}px`, "--rise": `-${60 + ((index * 29) % 150)}px`, "--finish": `${((index * 71) % 360) - 180}px`, "--fall": `${420 + ((index * 31) % 260)}px`, "--midturn": `${(index * 23) % 180}deg`, "--turn": `${(index * 67) % 360}deg`, "--color": ["#538d4e", "#d0ad3b", "#7869a7", "#e46e86", "#4fbfb0"][index % 5] } as CSSProperties} />;
     }))}</div>}
-    {startOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Candordle start menu"><section className="settings-modal start-modal"><h1>Candordle <span>V {__APP_VERSION__}</span></h1><p>You've played {saved.dailyPlays.count} times today.</p><button className="back-button" onClick={() => { recordSessionEvent("round_started", saved.round); setStartOpen(false); }}>Start Game</button><button className="secondary" onClick={() => { setStartOpen(false); setSettingsFromStart(true); setSettingsOpen(true); }}>Settings</button></section></div>}
+    {startOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Candordle start menu"><section className="settings-modal start-modal"><h1>Candordle <span>V {displayVersion}</span></h1><p>You've played {saved.dailyPlays.count} times today.</p><button className="back-button" onClick={() => { recordSessionEvent("round_started", saved.round); setStartOpen(false); }}>Start Game</button><button className="secondary" onClick={() => { setStartOpen(false); setSettingsFromStart(true); setSettingsOpen(true); }}>Settings</button></section></div>}
     <section className="title-bar" aria-label="Game controls">
       <label>Mode <select value={saved.round.mode} onChange={(event) => restart(event.target.value as Mode)}>{(Object.keys(MODES) as Mode[]).map((mode) => <option key={mode} value={mode}>{MODES[mode].label}</option>)}</select></label>
       <label>Category <select value={saved.round.theme} onChange={(event) => restart(saved.round.mode, event.target.value as Theme)}>{(Object.keys(ANSWERS) as Theme[]).map((theme) => <option key={theme} value={theme}>{CATEGORY_LABELS[theme]}</option>)}</select></label>
@@ -258,7 +278,7 @@ export function App() {
     {settingsOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Settings"><section className="settings-modal"><h2>Settings</h2>{setting("hard", "Hard mode")}{setting("clues", "Clues", saved.settings.hard)}{setting("sound", "Sound")}<button className="progress-button" onClick={() => { setSettingsOpen(false); setProgressOpen(true); }}>My Progress</button><button className="whats-new-button" onClick={() => { setSettingsOpen(false); setWhatsNewOpen(true); }}>What's New?</button><button className="danger clear-button" onClick={() => { setSettingsOpen(false); setClearConfirm(true); }}>Clear my progress</button><button className="back-button" onClick={() => { setSettingsOpen(false); if (settingsFromStart) { setSettingsFromStart(false); setStartOpen(true); } }}>Back</button></section></div>}
     {clearConfirm && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Clear progress confirmation"><section className="settings-modal confirm-modal"><h2>Are you sure?</h2><p>This will clear all your settings and progress.</p><button className="danger" onClick={clearProgress}>Yes</button><button className="back-button" onClick={() => { setClearConfirm(false); setSettingsOpen(true); }}>Back</button></section></div>}
     {progressOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="My Progress"><section className="settings-modal"><h2>My Progress</h2><section className="progress-highlights" aria-label="Highlights"><h3>Highlights</h3><dl><div><dt>Current streak</dt><dd>{saved.stats.streak}</dd></div><div><dt>Best streak</dt><dd>{saved.stats.bestStreak}</dd></div><div><dt>Wins</dt><dd>{saved.stats.wins}</dd></div></dl>{saved.stats.bestSpeedSeconds !== null && <p>Fastest Speed Wordle: {saved.stats.bestSpeedSeconds}s</p>}</section><p className="progress-scope">Classic Mode only</p><table className="progress-table"><thead><tr><th>Category</th><th>Right</th><th>Wrong</th><th>Yet</th><th>Hard?</th></tr></thead><tbody>{(Object.keys(ANSWERS) as Theme[]).map((theme) => <tr key={theme}><th>{CATEGORY_LABELS[theme]}</th><td>{saved.progress[theme].won}</td><td>{saved.progress[theme].lost}</td><td>{ANSWERS[theme].length - saved.progress[theme].played}</td><td><input className="hard-check" type="checkbox" checked={saved.progress[theme].completed > 0 && saved.progress[theme].allHardCompleted} readOnly aria-label={CATEGORY_LABELS[theme] + " all completed in hard mode"} /></td></tr>)}</tbody></table><p className="seed-note">Candordles served in random order.<br />No repeats.<br />RandomKey = {saved.seed}</p><button className="back-button" onClick={() => { setProgressOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}
-    {whatsNewOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="What's New"><section className="settings-modal whats-new-modal"><h2>What's New?</h2><div className="whats-new-scroll" tabIndex={0}>{WHATS_NEW.map((release) => <section key={release.version}><h3>{release.version}</h3><ul>{release.items.map((item) => <li key={item}>{item}</li>)}</ul></section>)}</div><button className="back-button" onClick={() => { setWhatsNewOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}
+    {whatsNewOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="What's New"><section className="settings-modal whats-new-modal"><h2>What's New?</h2><div className="whats-new-scroll" tabIndex={0}>{whatsNew.map((release) => <section key={release.version}><h3>{release.version}</h3><ul>{release.items.map((item) => <li key={item}>{item}</li>)}</ul></section>)}</div><button className="back-button" onClick={() => { setWhatsNewOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}
     {resultOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label={resultOpen === "won" ? "Puzzle solved" : "Puzzle complete"}><section className="settings-modal result-modal"><h2>{resultOpen === "won" ? "Brilliant!" : lossReason === "timeout" ? "Time's up" : "Round complete"}</h2><p>{resultOpen === "won" ? "You found the word." : "The word was " + saved.round.answer + "."}</p><button className="back-button" onClick={() => restart()}>Play again</button></section></div>}
     <section className="game-area">
       <div className="grid" style={{ "--attempts": MODES[saved.round.mode].attempts, gridTemplateRows: "repeat(" + MODES[saved.round.mode].attempts + ", minmax(0, 1fr))", aspectRatio: "5 / " + MODES[saved.round.mode].attempts } as CSSProperties}>{Array.from({ length: MODES[saved.round.mode].attempts }, (_, row) => {

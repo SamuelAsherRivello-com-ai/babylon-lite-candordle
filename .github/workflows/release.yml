@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           version="$(cut -d= -f2 version.txt)"
-          grep -Fq "version: \"V $version\"" wordle-clone/src/whats-new.ts
+          grep -Fq "\"version\": \"V $version\"" wordle-clone/public/changelog.json
           echo "value=$version" >> "$GITHUB_OUTPUT"
       - name: Tag release
         env:
