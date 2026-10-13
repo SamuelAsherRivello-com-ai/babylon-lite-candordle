@@ -24,7 +24,7 @@ main { position: relative; width: min(100vw, 62.5vh); height: min(100vh, 177.777
 .clue span { font-size: .65rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .clue p { margin: 0; overflow: hidden; font-family: Georgia, serif; font-size: .88rem; text-overflow: ellipsis; white-space: nowrap; }
 .clue small { font-size: .7rem; font-weight: 800; white-space: nowrap; }
-.grid { display: grid; inline-size: min(100%, calc(100cqb * 5 / 6)); max-inline-size: 100%; gap: 7px; }
+.grid { display: grid; block-size: 100%; inline-size: auto; min-block-size: 0; max-block-size: 100%; max-inline-size: 100%; gap: 7px; }
 .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
 .tile { display: grid; width: 100%; aspect-ratio: 1; place-items: center; border: 2px solid #3a3a3c; border-radius: 11px; background: #121213; color: #fff; box-shadow: 2px 3px 0 #172238; font-size: clamp(1.3rem, 7cqw, 2rem); font-weight: 900; }
 .tile.absent, .key.absent { background: #3a3a3c; color: #fff; }
@@ -79,7 +79,7 @@ main { position: relative; width: min(100vw, 62.5vh); height: min(100vh, 177.777
 .progress-highlights p { margin: 12px 0 0; color: #37445d; font-size: .78rem; font-weight: 800; text-align: center; }
 .progress-mode { margin: 0 0 20px; }
 .progress-mode h3 { margin: 0; color: #4e5a6e; font-size: .86rem; font-weight: 800; }
-.progress-mode p { margin: 6px 0 0; color: #37445d; font-size: .9rem; font-weight: 700; }
+.progress-mode p { margin: 6px 0 0; color: #172238; font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .progress-table th, .progress-table td { padding: 7px 5px; border-bottom: 1px solid #d8d8d8; text-align: right; font-variant-numeric: tabular-nums; }
 .progress-table th:first-child { text-align: left; }
 .progress-table .hard-check { width: 18px; height: 18px; margin: 0; accent-color: #538d4e; pointer-events: none; vertical-align: middle; }
