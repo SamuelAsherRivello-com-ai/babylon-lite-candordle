@@ -5,6 +5,7 @@ import { appendSessionEvent, readSessionHistory, SESSION_HISTORY_KEY, type Sessi
 import { WHATS_NEW } from "./whats-new.ts";
 
 const KEY = "wordle-clone.v1";
+const VERSION_RELOAD_KEY = "wordle-clone.v1.version-reload";
 const devMode = false;
 const keyboard = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"] as const;
 const REVEAL_STAGGER_MS = 190;
@@ -85,6 +86,19 @@ export function App() {
   const tiltRanks = useMemo(() => new Map(retainedTileIndices(saved.round).sort((left, right) => ((left * 17) % 31) - ((right * 17) % 31)).map((tileIndex, rank) => [tileIndex, rank])), [saved.round]);
 
   useEffect(() => { localStorage.setItem(KEY, JSON.stringify(saved)); }, [saved]);
+  useEffect(() => {
+    const refreshForNewRelease = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}version.txt`, { cache: "no-store" });
+        const deployedVersion = response.ok ? (await response.text()).trim().replace(/^version=/, "") : "";
+        if (deployedVersion && deployedVersion !== __APP_VERSION__ && sessionStorage.getItem(VERSION_RELOAD_KEY) !== deployedVersion) {
+          sessionStorage.setItem(VERSION_RELOAD_KEY, deployedVersion);
+          window.location.reload();
+        }
+      } catch {}
+    };
+    void refreshForNewRelease();
+  }, []);
   useEffect(() => { const interval = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(interval); }, []);
   const recordSessionEvent = (type: SessionEventType, round?: Round, outcome?: "won" | "lost") => {
     const occurredAt = Date.now();
