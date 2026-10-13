@@ -5,7 +5,7 @@ export type Mode = "classic" | "speed" | "two";
 export type Theme = "everyday" | "nature" | "food" | "southAfrica" | "psychology";
 export interface Settings { hard: boolean; sound: boolean; clues: boolean; }
 export interface Round { answer: string; guesses: string[]; mode: Mode; theme: Theme; deadline: number | null; hintUsed: boolean; started: boolean; hardMode: boolean; }
-export interface Statistics { wins: number; losses: number; streak: number; bestStreak: number; }
+export interface Statistics { wins: number; losses: number; streak: number; bestStreak: number; bestSpeedSeconds: number | null; }
 export interface CategoryProgress { played: number; won: number; lost: number; completed: number; allHardCompleted: boolean; }
 function toHundred(words: string[]) {
   return [...words, ...[...FIVE_LETTER_WORDS].filter((word) => !words.includes(word))].slice(0, 100);
@@ -40,7 +40,7 @@ export const MODES: Record<Mode, { label: string; attempts: number; seconds: num
   classic: { label: "Classic", attempts: 6, seconds: null }, speed: { label: "Speed Wordle", attempts: 6, seconds: 60 }, two: { label: "Two-Guess Challenge", attempts: 2, seconds: null },
 };
 export const DEFAULT_SETTINGS: Settings = { hard: false, sound: true, clues: false };
-export const DEFAULT_STATS: Statistics = { wins: 0, losses: 0, streak: 0, bestStreak: 0 };
+export const DEFAULT_STATS: Statistics = { wins: 0, losses: 0, streak: 0, bestStreak: 0, bestSpeedSeconds: null };
 export function createSeed() { return Math.floor(Math.random() * 0x7fffffff); }
 export function createCategoryProgress(): Record<Theme, CategoryProgress> {
   return Object.fromEntries((Object.keys(ANSWERS) as Theme[]).map((theme) => [theme, { played: 0, won: 0, lost: 0, completed: 0, allHardCompleted: false }])) as Record<Theme, CategoryProgress>;
@@ -64,9 +64,10 @@ export function evaluate(answer: string, guess: string): TileState[] {
   return states;
 }
 export function isValidWord(word: string) { return /^[A-Z]{5}$/.test(word) && GUESSES.has(word); }
-export function makeRound(mode: Mode, theme: Theme, now = Date.now(), index = 0, randomSeed?: number): Round { const words = randomSeed === undefined ? ANSWERS[theme] : orderedAnswers(theme, randomSeed); const answer = words[index % words.length] ?? words[0] ?? "AROSE"; return { answer, guesses: [], mode, theme, deadline: MODES[mode].seconds ? now + MODES[mode].seconds * 1000 : null, hintUsed: false, started: false, hardMode: false }; }
+export function makeRound(mode: Mode, theme: Theme, now = Date.now(), index = 0, randomSeed?: number): Round { const words = randomSeed === undefined ? ANSWERS[theme] : orderedAnswers(theme, randomSeed); const answer = words[index % words.length] ?? words[0] ?? "AROSE"; return { answer, guesses: [], mode, theme, deadline: null, hintUsed: false, started: false, hardMode: false }; }
 export function status(round: Round, now = Date.now()) { const limit = MODES[round.mode].attempts; if (round.guesses.at(-1) === round.answer) return "won" as const; if ((round.deadline !== null && now >= round.deadline) || round.guesses.length >= limit) return "lost" as const; return "playing" as const; }
 export function hardModeMessage(round: Round, guess: string) { for (const prior of round.guesses) { evaluate(round.answer, prior).forEach((state, index) => { const letter = prior[index] ?? ""; if (state === "correct" && guess[index] !== letter) throw new Error(`Keep ${letter} in position ${index + 1}.`); if (state === "present" && !guess.includes(letter)) throw new Error(`Guess must include ${letter}.`); }); } }
-export function clue(round: Round) { return WORD_HELP[round.answer]?.clue ?? `A five-letter ${round.theme === "southAfrica" ? "South Africa category" : round.theme === "psychology" ? "psychology category" : round.theme} word.`; }
-export function hint(round: Round) { return WORD_HELP[round.answer]?.hint ?? `Think ${round.theme === "southAfrica" ? "South Africa" : round.theme === "psychology" ? "psychology" : round.theme}: a familiar five-letter word.`; }
-export function updateStats(stats: Statistics, result: "won" | "lost") { const streak = result === "won" ? stats.streak + 1 : 0; return { wins: stats.wins + (result === "won" ? 1 : 0), losses: stats.losses + (result === "lost" ? 1 : 0), streak, bestStreak: Math.max(stats.bestStreak, streak) }; }
+export function clue(round: Round) { const vowels = [...round.answer].filter((letter) => "AEIOU".includes(letter)).length; return WORD_HELP[round.answer]?.clue ?? `It starts with ${round.answer[0]} and has ${vowels} ${vowels === 1 ? "vowel" : "vowels"}.`; }
+export function hint(round: Round) { return WORD_HELP[round.answer]?.hint ?? `It ends with ${round.answer.at(-1)}.`; }
+export function updateStats(stats: Statistics, result: "won" | "lost", speedSeconds?: number) { const streak = result === "won" ? stats.streak + 1 : 0; const bestSpeedSeconds = result === "won" && speedSeconds !== undefined ? Math.min(stats.bestSpeedSeconds ?? speedSeconds, speedSeconds) : stats.bestSpeedSeconds; return { wins: stats.wins + (result === "won" ? 1 : 0), losses: stats.losses + (result === "lost" ? 1 : 0), streak, bestStreak: Math.max(stats.bestStreak, streak), bestSpeedSeconds }; }
+
