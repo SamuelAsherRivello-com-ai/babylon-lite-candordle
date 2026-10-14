@@ -21,3 +21,9 @@
 ## 4. Integration verification
 
 - [ ] 4.1 Run the project's source coverage, typecheck, unit tests, browser tests, and gated build, then record the passing commands in the change evidence.
+
+## 5. Round menu flow
+
+- [ ] 5.1 Move mode and category selectors into the pre-round menu, persist their selected values, and verify changing them does not replace a round until Start Game.
+- [ ] 5.2 Show the pre-round menu after a win, loss, or quit, move settings access into active-play status, and verify the menu flow with browser tests.
+- [ ] 5.3 Add a Settings-only Quit current round action that discards the active round without updating results or category progress, then verify that behavior with unit and browser tests.

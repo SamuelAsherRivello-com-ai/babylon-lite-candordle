@@ -36,6 +36,10 @@ The audit report will record the original answer, its replacement, the category,
 
 The Settings Clues checkbox remains off by default. When enabled, the existing information area will show an answer-specific clue. The current three-correct-tile threshold will unlock one stronger hint. Word-specific metadata will replace generic fallback wording that repeats the category or answer length.
 
+### Make the start menu own round selection
+
+The pre-round menu will retain a draft mode and category in saved local state. It will appear at first launch and after every completed or discarded round. Choosing an option will not replace a round until the player presses Start Game. During active play, the status area will hold the settings control, while Settings will offer Quit current round. Quitting discards the active round and returns to the menu without writing a win, loss, or category result.
+
 ## Risks / Trade-offs
 
 - [A full reviewed catalog takes content-review time] → Keep the audit report beside the lists and test its structural constraints.

@@ -10,6 +10,7 @@ Candordle can repeat an answer when a player changes mode, and its category answ
 - Replace automatic dictionary backfilling with reviewed category answer lists. Publish an audit that records each removed answer and its replacement.
 - Restrict answers to familiar five-letter words that fit their category, exclude plurals, and exclude the historical original Wordle answer list while preserving ordinary non-plural inflections that fit.
 - Retain clues as an off-by-default Settings checkbox. When enabled, show an answer-specific clue and unlock one stronger non-spoiling hint after three correctly placed tiles.
+- Move mode and category selection into a locally remembered pre-round menu that appears before every round, and allow players to quit an unfinished round from Settings without recording a result.
 
 ## Capabilities
 
@@ -18,6 +19,7 @@ Candordle can repeat an answer when a player changes mode, and its category answ
 - `mode-category-progress`: Persist and display independent category progress for each game mode.
 - `curated-category-answers`: Maintain reviewed, category-fitting answer lists and their audit record.
 - `optional-answer-clues`: Provide opt-in, answer-specific clues and earned hints without redundant category or length information.
+- `round-menu-flow`: Let players choose and start their next round from a persistent menu and quit unfinished rounds safely.
 
 ### Modified Capabilities
 

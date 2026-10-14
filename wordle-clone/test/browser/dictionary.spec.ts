@@ -33,7 +33,7 @@ test("the start menu remembers round choices and quitting returns to it", async 
   await page.getByRole("combobox", { name: "Category" }).selectOption("nature");
   await page.getByRole("button", { name: "Start Game", exact: true }).click();
   await page.getByRole("button", { name: "Open settings", exact: true }).click();
-  await page.getByRole("button", { name: "Quit Game", exact: true }).click();
+  await page.getByRole("button", { name: "Quit current round", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Candordle start menu" })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Mode" })).toHaveValue("speed");
   await expect(page.getByRole("combobox", { name: "Category" })).toHaveValue("nature");

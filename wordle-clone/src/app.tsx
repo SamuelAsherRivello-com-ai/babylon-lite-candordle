@@ -188,7 +188,7 @@ export function App() {
     setDraft(""); setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(false);
   };
   const submit = () => {
-    if (gameState !== "playing") return;
+    if (startOpen || gameState !== "playing") return;
     if (!isValidWord(draft)) return;
     try { if (saved.settings.hard) hardModeMessage(saved.round, draft); } catch { return; }
     const submittedAt = Date.now();
@@ -228,12 +228,19 @@ export function App() {
     const roundKey = `${round.mode}:${round.theme}:${round.answer}:${round.deadline}:${round.guesses.join(",")}`;
     if (completedRoundRef.current === roundKey) return;
     setTimerStoppedAt(round.deadline);
-    setSaved((current) => current.round === round ? { ...current, stats: updateStats(current.stats, "lost") } : current);
+    setSaved((current) => {
+      if (current.round !== round) return current;
+      const progress = { ...current.progress };
+      const category = { ...progress[round.mode][round.theme], completed: progress[round.mode][round.theme].completed + 1, lost: progress[round.mode][round.theme].lost + 1 };
+      progress[round.mode] = { ...progress[round.mode], [round.theme]: category };
+      return { ...current, progress, stats: updateStats(current.stats, "lost") };
+    });
     recordSessionEvent("round_finished", round, "lost");
     finishLoss(round, "timeout");
   }, [gameState, saved.round]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || resultOpen) return;
       const key = event.key.toUpperCase();
       if (devMode && key === "T") triggerCelebration();
       if (devMode && key === "Y") triggerLoss();
@@ -245,6 +252,7 @@ export function App() {
     return () => removeEventListener("keydown", onKeyDown);
   });
   const enter = (key: string) => {
+    if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || resultOpen) return;
     if (devMode && key === "T") triggerCelebration();
     if (devMode && key === "Y") triggerLoss();
     else if (key === "ENTER") submit();
@@ -267,6 +275,7 @@ export function App() {
   const updateSelection = (selection: Partial<RoundSelection>) => setSaved((current) => ({ ...current, selection: { ...current.selection, ...selection } }));
   const quitGame = () => {
     completedRoundRef.current = null;
+    setSaved((current) => ({ ...current, round: makeRound(current.selection.mode, current.selection.theme, Date.now(), current.progress[current.selection.mode][current.selection.theme].played, current.seed) }));
     setDraft(""); setSettingsOpen(false); setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(true);
   };
   const returnToStartMenu = () => {
@@ -280,10 +289,15 @@ export function App() {
     }))}</div>}
     {startOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Candordle start menu"><section className="settings-modal start-modal"><h1>Candordle <span>V {displayVersion}</span></h1><p>You've played {saved.dailyPlays.count} times today.</p><label className="start-selection">Mode <select value={saved.selection.mode} onChange={(event) => updateSelection({ mode: event.target.value as Mode })}>{(Object.keys(MODES) as Mode[]).map((mode) => <option key={mode} value={mode}>{MODES[mode].label}</option>)}</select></label><label className="start-selection">Category <select value={saved.selection.theme} onChange={(event) => updateSelection({ theme: event.target.value as Theme })}>{(Object.keys(ANSWERS) as Theme[]).map((theme) => <option key={theme} value={theme}>{CATEGORY_LABELS[theme]}</option>)}</select></label><button className="back-button" onClick={startRound}>Start Game</button><button className="secondary" onClick={() => { setStartOpen(false); setSettingsFromStart(true); setSettingsOpen(true); }}>Settings</button></section></div>}
     <section className="info-bar" aria-label="Round information">
-      <div className="round-meta"><p className="speed-best">{saved.round.mode === "speed" && saved.stats.bestSpeedSeconds !== null ? `Best: ${saved.stats.bestSpeedSeconds}s` : ""}</p><p className="game-status" role="status" aria-live="polite">{statusText}</p><button className="settings-button" aria-label="Open settings" onClick={() => setSettingsOpen(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 2h3.2l.6 2.2c.6.2 1.1.5 1.6.9l2.2-.7 1.6 2.8-1.6 1.6c.1.6.1 1.3 0 1.9l1.6 1.6-1.6 2.8-2.2-.7c-.5.4-1 .7-1.6.9l-.6 2.2h-3.2l-.6-2.2c-.6-.2-1.1-.5-1.6-.9l-2.2.7-1.6-2.8 1.6-1.6a7 7 0 0 1 0-1.9L4.6 7.2l1.6-2.8 2.2.7c.5-.4 1-.7 1.6-.9L10.4 2Z"/><circle cx="12" cy="9.8" r="2.8"/></svg></button></div>
-      {saved.settings.clues && <div className={progress >= 3 && !saved.round.hintUsed ? "clue has-hint" : "clue"}><span>{saved.round.mode === "two" ? "Challenge clue" : "Clue"}</span><p title={saved.round.hintUsed ? hint(saved.round) : clue(saved.round)}>{saved.round.hintUsed ? hint(saved.round) : clue(saved.round)}</p><small>Placed: {progress}/3</small>{progress >= 3 && !saved.round.hintUsed && <button onClick={() => setSaved((current) => ({ ...current, round: { ...current.round, hintUsed: true } }))}>Hint</button>}</div>}
+      <div className={`info-bar-content${saved.settings.clues ? "" : " clues-hidden"}`}>
+        <div className="info-bar-copy">
+          <div className="round-meta"><p className="speed-best">{saved.round.mode === "speed" && saved.stats.bestSpeedSeconds !== null ? `Best: ${saved.stats.bestSpeedSeconds}s` : ""}</p><p className="game-status" role="status" aria-live="polite">{statusText}</p></div>
+          <div className={progress >= 3 && !saved.round.hintUsed ? "clue has-hint" : "clue"}>{saved.settings.clues && <><span>{saved.round.mode === "two" ? "Challenge clue" : "Clue"}</span><p title={saved.round.hintUsed ? hint(saved.round) : clue(saved.round)}>{saved.round.hintUsed ? hint(saved.round) : clue(saved.round)}</p><small>Placed: {progress}/3</small>{progress >= 3 && !saved.round.hintUsed && <button onClick={() => setSaved((current) => ({ ...current, round: { ...current.round, hintUsed: true } }))}>Hint</button>}</>}</div>
+        </div>
+        <button className="settings-button" aria-label="Open settings" onClick={() => setSettingsOpen(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 2h3.2l.6 2.2c.6.2 1.1.5 1.6.9l2.2-.7 1.6 2.8-1.6 1.6c.1.6.1 1.3 0 1.9l1.6 1.6-1.6 2.8-2.2-.7c-.5.4-1 .7-1.6.9l-.6 2.2h-3.2l-.6-2.2c-.6-.2-1.1-.5-1.6-.9l-2.2.7-1.6-2.8 1.6-1.6a7 7 0 0 1 0-1.9L4.6 7.2l1.6-2.8 2.2.7c.5-.4 1-.7 1.6-.9L10.4 2Z"/><circle cx="12" cy="9.8" r="2.8"/></svg></button>
+      </div>
     </section>
-    {settingsOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Settings"><section className="settings-modal"><h2>Settings</h2>{setting("hard", "Hard mode")}{setting("clues", "Clues", saved.settings.hard)}{setting("sound", "Sound")}<button className="progress-button" onClick={() => { setSettingsOpen(false); setProgressOpen(true); }}>My Progress</button><button className="whats-new-button" onClick={() => { setSettingsOpen(false); setWhatsNewOpen(true); }}>What's New?</button>{!settingsFromStart && !startOpen && gameState === "playing" && <button className="danger" onClick={quitGame}>Quit Game</button>}<button className="danger clear-button" onClick={() => { setSettingsOpen(false); setClearConfirm(true); }}>Clear my progress</button><button className="back-button" onClick={() => { setSettingsOpen(false); if (settingsFromStart) { setSettingsFromStart(false); setStartOpen(true); } }}>Back</button></section></div>}
+    {settingsOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Settings"><section className="settings-modal"><h2>Settings</h2>{setting("hard", "Hard mode")}{setting("clues", "Clues", saved.settings.hard)}{setting("sound", "Sound")}<button className="progress-button" onClick={() => { setSettingsOpen(false); setProgressOpen(true); }}>My Progress</button><button className="whats-new-button" onClick={() => { setSettingsOpen(false); setWhatsNewOpen(true); }}>What's New?</button>{!settingsFromStart && !startOpen && gameState === "playing" && <button className="danger" onClick={quitGame}>Quit current round</button>}<button className="danger clear-button" onClick={() => { setSettingsOpen(false); setClearConfirm(true); }}>Clear my progress</button><button className="back-button" onClick={() => { setSettingsOpen(false); if (settingsFromStart) { setSettingsFromStart(false); setStartOpen(true); } }}>Back</button></section></div>}
     {clearConfirm && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Clear progress confirmation"><section className="settings-modal confirm-modal"><h2>Are you sure?</h2><p>This will clear all your settings and progress.</p><button className="danger" onClick={clearProgress}>Yes</button><button className="back-button" onClick={() => { setClearConfirm(false); setSettingsOpen(true); }}>Back</button></section></div>}
     {progressOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="My Progress"><section className="settings-modal"><h2>My Progress</h2><section className="progress-highlights" aria-label="Highlights"><h3>Highlights</h3><dl><div><dt>Current streak</dt><dd>{saved.stats.streak}</dd></div><div><dt>Best streak</dt><dd>{saved.stats.bestStreak}</dd></div><div><dt>Wins</dt><dd>{saved.stats.wins}</dd></div></dl></section><label className="progress-mode">Mode <select value={progressMode} onChange={(event) => setProgressMode(event.target.value as Mode)}>{(Object.keys(MODES) as Mode[]).map((mode) => <option key={mode} value={mode}>{MODES[mode].label}</option>)}</select></label>{progressMode === "speed" && <section className="progress-mode" aria-label="Speed Mode"><p>Your fastest time is {saved.stats.bestSpeedSeconds === null ? "—" : `${saved.stats.bestSpeedSeconds} secs`}.</p></section>}<table className="progress-table"><thead><tr><th>Category</th><th>Right</th><th>Wrong</th><th>Yet</th><th>Hard?</th></tr></thead><tbody>{(Object.keys(ANSWERS) as Theme[]).map((theme) => { const category = saved.progress[progressMode][theme]; return <tr key={theme}><th>{CATEGORY_LABELS[theme]}</th><td>{category.won}</td><td>{category.lost}</td><td>{ANSWERS[theme].length - category.played}</td><td><input className="hard-check" type="checkbox" checked={category.completed > 0 && category.allHardCompleted} readOnly aria-label={CATEGORY_LABELS[theme] + " all completed in hard mode"} /></td></tr>; })}</tbody></table><p className="seed-note">Candordles served in random order.<br />No repeats.<br />RandomKey = {saved.seed}</p><button className="back-button" onClick={() => { setProgressOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}
     {whatsNewOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="What's New"><section className="settings-modal whats-new-modal"><h2>What's New?</h2><div className="whats-new-scroll" tabIndex={0}>{whatsNew.map((release) => <section key={release.version}><h3>{release.version}</h3><ul>{release.items.map((item) => <li key={item}>{item}</li>)}</ul></section>)}</div><button className="back-button" onClick={() => { setWhatsNewOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}

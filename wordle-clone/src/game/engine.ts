@@ -1,4 +1,5 @@
 import { FIVE_LETTER_WORDS } from "./dictionary.ts";
+import { ORIGINAL_WORDLE_ANSWERS } from "./original-wordle-answers.ts";
 
 export type TileState = "empty" | "absent" | "present" | "correct";
 export type Mode = "classic" | "speed" | "two";
@@ -9,7 +10,7 @@ export interface Statistics { wins: number; losses: number; streak: number; best
 export interface CategoryProgress { played: number; won: number; lost: number; completed: number; allHardCompleted: boolean; }
 export type ModeCategoryProgress = Record<Mode, Record<Theme, CategoryProgress>>;
 function toHundred(words: string[]) {
-  return [...words, ...[...FIVE_LETTER_WORDS].filter((word) => !words.includes(word))].slice(0, 100);
+  return [...words, ...[...FIVE_LETTER_WORDS].filter((word) => !words.includes(word) && !ORIGINAL_WORDLE_ANSWERS.has(word) && !word.endsWith("S"))].slice(0, 100);
 }
 
 export const ANSWERS: Record<Theme, string[]> = {
@@ -19,6 +20,8 @@ export const ANSWERS: Record<Theme, string[]> = {
   southAfrica: ["ALOES", "BEACH", "BRAAI", "CAPES", "CAVES", "CEDAR", "CLIFF", "COAST", "COINS", "CRANE", "DUNES", "EAGLE", "ELAND", "GENET", "GOLDS", "GRASS", "HONEY", "HORSE", "HYENA", "ISLES", "KAROO", "KUDUS", "KWELA", "LEARN", "LIONS", "MAPLE", "MINES", "MONEY", "MOUNT", "NATAL", "OCEAN", "OLIVE", "RHINO", "PLAIN", "PLANT", "PRIDE", "RANDS", "RIDGE", "RIVER", "ROCKY", "RUGBY", "SABLE", "SHEEP", "OCHRE", "SOUTH", "STORK", "TABLE", "TOWNS", "TRAIL", "REEDS", "VELDT", "VINES", "WINEY", "KOPJE", "ZEBRA", "ZULUS", "ACRES", "BIRDS", "BLACK", "BLUEY", "BROWN", "CLOUD", "CRAFT", "CROWN", "DANCE", "EARTH", "FARMS", "FIELD", "FLORA", "FRESH", "GREEN", "GROVE", "HERDS", "HILLS", "HOTEL", "HOUSE", "IVORY", "LEAFY", "LIGHT", "LODGE", "MANGO", "METAL", "OASIS", "PEACH", "RAINY", "ROOTS", "ROADS", "SANDS", "SEEDS", "SHORE", "SMOKE", "SNAKE", "STONE", "SUNNY", "TREES", "WATER", "WHEAT", "WILDS", "WINES", "WOODS"],
   psychology: ["ABUSE", "ADAPT", "AGING", "ALERT", "ALTER", "AMITY", "ANGER", "AVOID", "AWARE", "BRAIN", "BLUSH", "BONDS", "CALMS", "CARES", "CLASH", "CLEAR", "COPES", "CRAVE", "DREAD", "DREAM", "DRIVE", "DOUBT", "EMOTE", "EQUAL", "ETHIC", "FAITH", "FALSE", "FEARS", "FIXED", "FOCUS", "FORMS", "GAMES", "GAZES", "GOALS", "GRIEF", "GUILT", "HABIT", "HAPPY", "HEART", "HUMOR", "IDEAL", "IDOLS", "IMAGE", "INNER", "JUDGE", "KNOWS", "LEARN", "LOGIC", "LONER", "LOVED", "LOVES", "LOYAL", "MEANS", "MINDS", "MOODS", "MORAL", "NERVE", "NEEDS", "PANIC", "PAINS", "PEACE", "PEERS", "POWER", "PRIDE", "PROUD", "PSYCH", "QUICK", "QUIET", "RAGES", "REACT", "RELAX", "RISKY", "RULES", "SADLY", "SCARE", "SENSE", "SHAME", "SHYLY", "SIGNS", "SKILL", "SLEEP", "SMILE", "SOULS", "SPEAK", "STARE", "STUCK", "STYLE", "TEACH", "TEARS", "TENSE", "THINK", "TRAIT", "TREAT", "TRUST", "TRUTH", "VALUE", "VOICE", "WANTS", "WORRY", "YOUTH"],
 };
+for (const theme of Object.keys(ANSWERS) as Theme[]) ANSWERS[theme] = toHundred(ANSWERS[theme].filter((word) => !ORIGINAL_WORDLE_ANSWERS.has(word) && !word.endsWith("S")));
+export { ORIGINAL_WORDLE_ANSWERS };
 const WORD_HELP: Record<string, { clue: string; hint: string }> = {
   AROSE: { clue: "Came into being, in the past.", hint: "Think of something beginning or appearing." },
   CRANE: { clue: "A long-legged bird, or a construction lifter.", hint: "It can fly—or lift a heavy load." },
@@ -50,9 +53,11 @@ export function createModeCategoryProgress(): ModeCategoryProgress {
   return Object.fromEntries((Object.keys(MODES) as Mode[]).map((mode) => [mode, createCategoryProgress()])) as ModeCategoryProgress;
 }
 function hash(text: string) { return [...text].reduce((value, character) => ((value * 31) + character.charCodeAt(0)) >>> 0, 2166136261); }
-export function orderedAnswers(theme: Theme, seed: number) {
+export function orderedAnswers(theme: Theme, seed: number, mode?: Mode) {
   const words = [...ANSWERS[theme]];
-  let value = (seed ^ hash(theme)) >>> 0;
+  // A mode has its own position and a distinct order.  Without the latter,
+  // changing modes at position zero still surfaces the same first word.
+  let value = (seed ^ hash(`${theme}:${mode ?? "shared"}`)) >>> 0;
   const random = () => { value = ((value * 1664525) + 1013904223) >>> 0; return value / 0x100000000; };
   for (let index = words.length - 1; index > 0; index -= 1) {
     const next = Math.floor(random() * (index + 1));
@@ -68,7 +73,7 @@ export function evaluate(answer: string, guess: string): TileState[] {
   return states;
 }
 export function isValidWord(word: string) { return /^[A-Z]{5}$/.test(word) && GUESSES.has(word); }
-export function makeRound(mode: Mode, theme: Theme, now = Date.now(), index = 0, randomSeed?: number): Round { const words = randomSeed === undefined ? ANSWERS[theme] : orderedAnswers(theme, randomSeed); const answer = words[index % words.length] ?? words[0] ?? "AROSE"; return { answer, guesses: [], mode, theme, deadline: null, hintUsed: false, started: false, hardMode: false }; }
+export function makeRound(mode: Mode, theme: Theme, now = Date.now(), index = 0, randomSeed?: number): Round { const words = randomSeed === undefined ? ANSWERS[theme] : orderedAnswers(theme, randomSeed, mode); const answer = words[index % words.length] ?? words[0] ?? "AROSE"; return { answer, guesses: [], mode, theme, deadline: null, hintUsed: false, started: false, hardMode: false }; }
 export function status(round: Round, now = Date.now()) { const limit = MODES[round.mode].attempts; if (round.guesses.at(-1) === round.answer) return "won" as const; if ((round.deadline !== null && now >= round.deadline) || round.guesses.length >= limit) return "lost" as const; return "playing" as const; }
 export function hardModeMessage(round: Round, guess: string) { for (const prior of round.guesses) { evaluate(round.answer, prior).forEach((state, index) => { const letter = prior[index] ?? ""; if (state === "correct" && guess[index] !== letter) throw new Error(`Keep ${letter} in position ${index + 1}.`); if (state === "present" && !guess.includes(letter)) throw new Error(`Guess must include ${letter}.`); }); } }
 export function clue(round: Round) { const vowels = [...round.answer].filter((letter) => "AEIOU".includes(letter)).length; return WORD_HELP[round.answer]?.clue ?? `It starts with ${round.answer[0]} and has ${vowels} ${vowels === 1 ? "vowel" : "vowels"}.`; }
