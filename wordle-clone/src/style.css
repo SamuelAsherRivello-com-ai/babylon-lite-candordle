@@ -14,18 +14,21 @@ main { position: relative; width: min(100vw, 62.5vh); height: min(100vh, 177.777
 .info-bar-content.clues-hidden .clue { min-height: 0; height: 0; padding-block: 0; overflow: hidden; }
 .info-bar-content.clues-hidden .round-meta { align-self: center; margin-bottom: 0; }
 .clue button { height: 100%; border: 0; border-radius: 8px; padding: 0 9px; background: #edf1ef; color: #172238; font-size: .76rem; font-weight: 800; }
-.settings-button { display: grid; width: 42px; min-height: 0; height: 100%; place-items: center; border: 2px solid #172238; border-radius: 14px; padding: 9px; background: #fff; color: #172238; }
-.settings-button svg { width: 22px; height: 22px; transform: translateY(2px); fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.info-actions { display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 4px; min-height: 0; }
+.settings-button, .quit-button { display: grid; width: 42px; min-height: 0; height: 100%; place-items: center; border: 2px solid #172238; border-radius: 14px; padding: 3px; background: #fff; color: #172238; }
+.settings-button svg, .quit-button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.quit-button:disabled { cursor: not-allowed; opacity: .38; }
 .game-area { display: grid; inline-size: auto; block-size: 100%; min-height: 0; max-inline-size: 100%; justify-self: center; align-self: stretch; overflow: hidden; padding: 12px; place-items: center; aspect-ratio: 5 / 6; container-type: size; }
 .round-meta { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); width: 100%; min-height: 0; margin: 0; border-radius: 12px 12px 0 0; padding: 0 8px; background: #dceeea; align-items: center; }
-.game-status { grid-column: 2; margin: 0; color: #b04b65; font-size: 1rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; }
+.game-status { grid-column: 2; margin: 0; color: #000; font-size: 1rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; }
 .speed-best { grid-column: 1; margin: 0; overflow: hidden; color: #4e5a6e; font-size: .75rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
-.clue { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; width: 100%; min-height: 0; margin: 0; border-radius: 0 0 12px 12px; padding: 0 7px; background: #f8dd8a; column-gap: 8px; overflow: hidden; }
+.clue { position: relative; display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; width: 100%; min-height: 0; margin: 0; border-radius: 0 0 12px 12px; padding: 0 7px; background: #f8dd8a; column-gap: 8px; overflow: hidden; }
 .info-bar-copy .clue { margin-block: 0; }
 .clue.has-hint { grid-template-columns: max-content minmax(0, 1fr) max-content auto; }
 .clue > :not(button) { display: flex; align-items: center; height: 100%; }
 .clue span { font-size: .65rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-.clue p { margin: 0; overflow: hidden; font-family: Georgia, serif; font-size: .88rem; text-overflow: ellipsis; white-space: nowrap; }
+.clue p { position: absolute; inset: 0; justify-content: center; margin: 0; overflow: hidden; font-family: Georgia, serif; font-size: .88rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.clue > :not(p) { position: relative; z-index: 1; }
 .clue small { font-size: .7rem; font-weight: 800; white-space: nowrap; }
 .game-board { display: grid; block-size: 100%; inline-size: auto; min-block-size: 0; max-block-size: 100%; max-inline-size: 100%; place-items: center; aspect-ratio: 5 / 6; }
 .grid { display: grid; block-size: 100%; inline-size: auto; min-block-size: 0; max-block-size: 100%; max-inline-size: 100%; gap: 7px; }
@@ -68,6 +71,7 @@ main { position: relative; width: min(100vw, 62.5vh); height: min(100vh, 177.777
 .confirm-modal p { margin: 0; color: #751b16; font-weight: 700; }
 .settings-modal button { margin-top: 14px; border: 0; border-radius: 8px; padding: 9px 18px; background: #538d4e; color: #fff; font-weight: 800; }
 .settings-modal > button { width: 100%; }
+.settings-modal > button + button { margin-top: 10px; }
 .settings-modal .clear-button { display: block; background: #b3261e; }
 .settings-modal .progress-button { display: block; background: #384e79; }
 .settings-modal .whats-new-button { display: block; background: #7869a7; }
@@ -101,9 +105,9 @@ main { position: relative; width: min(100vw, 62.5vh); height: min(100vh, 177.777
 @media (max-width: 767px) {
   main { gap: 12px; }
   .info-bar { padding: 10px; border-radius: 20px; box-shadow: 5px 6px 0 #172238; }
-  .settings-button { width: 38px; height: 38px; padding: 8px; }
+  .settings-button, .quit-button { width: 38px; padding: 3px; }
   .info-bar-content { grid-template-columns: minmax(0, 1fr) 38px; column-gap: 8px; }
-  .info-bar-copy, .settings-button { border-radius: 12px; }
+  .info-bar-copy, .settings-button, .quit-button { border-radius: 12px; }
   .round-meta { border-radius: 10px 10px 0 0; }
   .clue { border-radius: 0 0 10px 10px; }
   .game-area { padding: 12px; border-radius: 20px; box-shadow: 5px 6px 0 #172238; }
@@ -116,6 +120,7 @@ main { position: relative; width: min(100vw, 62.5vh); height: min(100vh, 177.777
   .key.action { flex-basis: 48px; max-width: 48px; font-size: .64rem; }
   .start-modal button { min-height: 76px; margin-top: 28px; font-size: 1.08rem; }
   .settings-modal > button { min-height: 76px; margin-top: 28px; font-size: 1.08rem; }
+  .settings-modal > button + button { margin-top: 12px; }
   .whats-new-scroll { max-height: min(46svh, 360px); padding-right: 10px; }
 }
 @media (max-width: 767px) and (max-height: 720px) {

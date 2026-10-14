@@ -70,6 +70,7 @@ export function App() {
   const [progressMode, setProgressMode] = useState<Mode>("classic");
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [quitConfirm, setQuitConfirm] = useState(false);
   const [resultOpen, setResultOpen] = useState<"won" | "lost" | null>(null);
   const [lossReason, setLossReason] = useState<"attempts" | "timeout" | null>(null);
   const [lossAnimation, setLossAnimation] = useState(false);
@@ -240,7 +241,7 @@ export function App() {
   }, [gameState, saved.round]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || resultOpen) return;
+      if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || quitConfirm || resultOpen) return;
       const key = event.key.toUpperCase();
       if (devMode && key === "T") triggerCelebration();
       if (devMode && key === "Y") triggerLoss();
@@ -252,7 +253,7 @@ export function App() {
     return () => removeEventListener("keydown", onKeyDown);
   });
   const enter = (key: string) => {
-    if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || resultOpen) return;
+    if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || quitConfirm || resultOpen) return;
     if (devMode && key === "T") triggerCelebration();
     if (devMode && key === "Y") triggerLoss();
     else if (key === "ENTER") submit();
@@ -270,13 +271,13 @@ export function App() {
     const seed = createSeed();
     setSaved({ round: makeRound("classic", "everyday", Date.now(), 0, seed), selection: { mode: "classic", theme: "everyday" }, settings: DEFAULT_SETTINGS, stats: DEFAULT_STATS, seed, progress: createModeCategoryProgress(), dailyPlays: { date: todayKey(), count: 0 } });
     completedRoundRef.current = null;
-    setDraft(""); setClearConfirm(false); setSettingsOpen(false); setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(true);
+    setDraft(""); setClearConfirm(false); setQuitConfirm(false); setSettingsOpen(false); setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(true);
   };
   const updateSelection = (selection: Partial<RoundSelection>) => setSaved((current) => ({ ...current, selection: { ...current.selection, ...selection } }));
   const quitGame = () => {
     completedRoundRef.current = null;
     setSaved((current) => ({ ...current, round: makeRound(current.selection.mode, current.selection.theme, Date.now(), current.progress[current.selection.mode][current.selection.theme].played, current.seed) }));
-    setDraft(""); setSettingsOpen(false); setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(true);
+    setDraft(""); setQuitConfirm(false); setSettingsOpen(false); setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(true);
   };
   const returnToStartMenu = () => {
     setResultOpen(null); setLossReason(null); setLossAnimation(false); setTimerStoppedAt(null); setSettingsFromStart(false); setStartOpen(true);
@@ -294,11 +295,12 @@ export function App() {
           <div className="round-meta"><p className="speed-best">{saved.round.mode === "speed" && saved.stats.bestSpeedSeconds !== null ? `Best: ${saved.stats.bestSpeedSeconds}s` : ""}</p><p className="game-status" role="status" aria-live="polite">{statusText}</p></div>
           <div className={progress >= 3 && !saved.round.hintUsed ? "clue has-hint" : "clue"}>{saved.settings.clues && <><span>{saved.round.mode === "two" ? "Challenge clue" : "Clue"}</span><p title={saved.round.hintUsed ? hint(saved.round) : clue(saved.round)}>{saved.round.hintUsed ? hint(saved.round) : clue(saved.round)}</p><small>Placed: {progress}/3</small>{progress >= 3 && !saved.round.hintUsed && <button onClick={() => setSaved((current) => ({ ...current, round: { ...current.round, hintUsed: true } }))}>Hint</button>}</>}</div>
         </div>
-        <button className="settings-button" aria-label="Open settings" onClick={() => setSettingsOpen(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 2h3.2l.6 2.2c.6.2 1.1.5 1.6.9l2.2-.7 1.6 2.8-1.6 1.6c.1.6.1 1.3 0 1.9l1.6 1.6-1.6 2.8-2.2-.7c-.5.4-1 .7-1.6.9l-.6 2.2h-3.2l-.6-2.2c-.6-.2-1.1-.5-1.6-.9l-2.2.7-1.6-2.8 1.6-1.6a7 7 0 0 1 0-1.9L4.6 7.2l1.6-2.8 2.2.7c.5-.4 1-.7 1.6-.9L10.4 2Z"/><circle cx="12" cy="9.8" r="2.8"/></svg></button>
+        <div className="info-actions"><button className="settings-button" aria-label="Open settings" onClick={() => setSettingsOpen(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 2h3.2l.6 2.2c.6.2 1.1.5 1.6.9l2.2-.7 1.6 2.8-1.6 1.6c.1.6.1 1.3 0 1.9l1.6 1.6-1.6 2.8-2.2-.7c-.5.4-1 .7-1.6.9l-.6 2.2h-3.2l-.6-2.2c-.6-.2-1.1-.5-1.6-.9l-2.2.7-1.6-2.8 1.6-1.6a7 7 0 0 1 0-1.9L4.6 7.2l1.6-2.8 2.2.7c.5-.4 1-.7 1.6-.9L10.4 2Z"/><circle cx="12" cy="9.8" r="2.8"/></svg></button></div>
       </div>
     </section>
-    {settingsOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Settings"><section className="settings-modal"><h2>Settings</h2>{setting("hard", "Hard mode")}{setting("clues", "Clues", saved.settings.hard)}{setting("sound", "Sound")}<button className="progress-button" onClick={() => { setSettingsOpen(false); setProgressOpen(true); }}>My Progress</button><button className="whats-new-button" onClick={() => { setSettingsOpen(false); setWhatsNewOpen(true); }}>What's New?</button>{!settingsFromStart && !startOpen && gameState === "playing" && <button className="danger" onClick={quitGame}>Quit current round</button>}<button className="danger clear-button" onClick={() => { setSettingsOpen(false); setClearConfirm(true); }}>Clear my progress</button><button className="back-button" onClick={() => { setSettingsOpen(false); if (settingsFromStart) { setSettingsFromStart(false); setStartOpen(true); } }}>Back</button></section></div>}
+    {settingsOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Settings"><section className="settings-modal"><h2>Settings</h2>{setting("hard", "Hard mode")}{setting("clues", "Clues", saved.settings.hard)}{setting("sound", "Sound")}<button className="progress-button" onClick={() => { setSettingsOpen(false); setProgressOpen(true); }}>My Progress</button><button className="whats-new-button" onClick={() => { setSettingsOpen(false); setWhatsNewOpen(true); }}>What's New?</button>{!settingsFromStart && !startOpen && gameState === "playing" && <button className="danger" onClick={() => setQuitConfirm(true)}>Quit current round</button>}<button className="danger clear-button" onClick={() => { setSettingsOpen(false); setClearConfirm(true); }}>Clear my progress</button><button className="back-button" onClick={() => { setSettingsOpen(false); if (settingsFromStart) { setSettingsFromStart(false); setStartOpen(true); } }}>Back</button></section></div>}
     {clearConfirm && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Clear progress confirmation"><section className="settings-modal confirm-modal"><h2>Are you sure?</h2><p>This will clear all your settings and progress.</p><button className="danger" onClick={clearProgress}>Yes</button><button className="back-button" onClick={() => { setClearConfirm(false); setSettingsOpen(true); }}>Back</button></section></div>}
+    {quitConfirm && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Quit current round confirmation"><section className="settings-modal confirm-modal"><h2>Quit this round?</h2><p>Your current guesses will be discarded.</p><button className="danger" onClick={quitGame}>Quit round</button><button className="back-button" onClick={() => setQuitConfirm(false)}>Keep playing</button></section></div>}
     {progressOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="My Progress"><section className="settings-modal"><h2>My Progress</h2><section className="progress-highlights" aria-label="Highlights"><h3>Highlights</h3><dl><div><dt>Current streak</dt><dd>{saved.stats.streak}</dd></div><div><dt>Best streak</dt><dd>{saved.stats.bestStreak}</dd></div><div><dt>Wins</dt><dd>{saved.stats.wins}</dd></div></dl></section><label className="progress-mode">Mode <select value={progressMode} onChange={(event) => setProgressMode(event.target.value as Mode)}>{(Object.keys(MODES) as Mode[]).map((mode) => <option key={mode} value={mode}>{MODES[mode].label}</option>)}</select></label>{progressMode === "speed" && <section className="progress-mode" aria-label="Speed Mode"><p>Your fastest time is {saved.stats.bestSpeedSeconds === null ? "—" : `${saved.stats.bestSpeedSeconds} secs`}.</p></section>}<table className="progress-table"><thead><tr><th>Category</th><th>Right</th><th>Wrong</th><th>Yet</th><th>Hard?</th></tr></thead><tbody>{(Object.keys(ANSWERS) as Theme[]).map((theme) => { const category = saved.progress[progressMode][theme]; return <tr key={theme}><th>{CATEGORY_LABELS[theme]}</th><td>{category.won}</td><td>{category.lost}</td><td>{ANSWERS[theme].length - category.played}</td><td><input className="hard-check" type="checkbox" checked={category.completed > 0 && category.allHardCompleted} readOnly aria-label={CATEGORY_LABELS[theme] + " all completed in hard mode"} /></td></tr>; })}</tbody></table><p className="seed-note">Candordles served in random order.<br />No repeats.<br />RandomKey = {saved.seed}</p><button className="back-button" onClick={() => { setProgressOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}
     {whatsNewOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="What's New"><section className="settings-modal whats-new-modal"><h2>What's New?</h2><div className="whats-new-scroll" tabIndex={0}>{whatsNew.map((release) => <section key={release.version}><h3>{release.version}</h3><ul>{release.items.map((item) => <li key={item}>{item}</li>)}</ul></section>)}</div><button className="back-button" onClick={() => { setWhatsNewOpen(false); setSettingsOpen(true); }}>Back</button></section></div>}
     {resultOpen && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label={resultOpen === "won" ? "Puzzle solved" : "Puzzle complete"}><section className="settings-modal result-modal"><h2>{resultOpen === "won" ? "Brilliant!" : lossReason === "timeout" ? "Time's up" : "Round complete"}</h2><p>{resultOpen === "won" ? "You found the word." : "The word was " + saved.round.answer + "."}</p><button className="back-button" onClick={returnToStartMenu}>Choose next round</button></section></div>}
