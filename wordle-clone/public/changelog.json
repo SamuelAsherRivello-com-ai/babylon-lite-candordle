@@ -1,0 +1,43 @@
+[
+  {
+    "version": "V 0.0.14",
+    "items": [
+      "Keep round details together in a dedicated info bar, while the game area stays focused on the tiles.",
+      "Follow your current turn in Classic and Two-Guess Challenge, or watch the countdown in Speed Wordle.",
+      "Play more comfortably on narrow screens with a centered board, consistent tile spacing, and clearer keyboard controls.",
+      "Candordle now checks its deployed version and release notes, so bookmarked games refresh to the newest release."
+    ]
+  },
+  {
+    "version": "V 0.0.12",
+    "items": [
+      "Candordle now uses a focused portrait layout, with a refreshed board, keyboard, and menus that scale together.",
+      "Start from a new welcome screen that shows today's plays, then choose a category with your own shuffled, no-repeat word order.",
+      "Open My Progress to see your streaks, wins, fastest Speed Wordle time, and Classic Mode category progress.",
+      "Choose optional clues or hard mode, hear new game sounds, and enjoy tile reveals, win confetti, and a clearer end-of-round result.",
+      "Read these release notes any time from Settings."
+    ]
+  },
+  {
+    "version": "V 0.0.11",
+    "items": [
+      "Meet Candordle, with a fresh start menu and bigger mobile controls.",
+      "Choose from 100-word Everyday, Nature, Food, South Africa, and Psychology categories.",
+      "Track your progress, keep your personal random order, and return to an unfinished Candordle.",
+      "Enjoy gentler reveal sounds, clearer results, and a more spacious game board."
+    ]
+  },
+  {
+    "version": "V 0.0.10",
+    "items": [
+      "More familiar five-letter words are ready to play.",
+      "Refined controls and clearer game feedback make each round easier to follow."
+    ]
+  },
+  {
+    "version": "V 0.0.9",
+    "items": [
+      "Candordle became available as a playable online game."
+    ]
+  }
+]

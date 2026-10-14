@@ -33,25 +33,19 @@ jobs:
         run: npm test
       - name: Build template
         run: npm run build
-      - name: Bump patch version
+      - name: Verify declared release version
         id: version
         shell: bash
         run: |
-          current="$(cut -d= -f2 version.txt)"
-          IFS=. read -r major minor patch <<< "$current"
-          next="$major.$minor.$((patch + 1))"
-          printf 'version=%s\n' "$next" > version.txt
-          echo "value=$next" >> "$GITHUB_OUTPUT"
-      - name: Commit and tag release
+          version="$(cut -d= -f2 version.txt)"
+          grep -Fq "\"version\": \"V $version\"" wordle-clone/public/changelog.json
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+      - name: Tag release
         env:
           VERSION: ${{ steps.version.outputs.value }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.txt
-          git commit -m "chore: release v$VERSION"
           git tag "v$VERSION"
-          git push origin HEAD:main --tags
+          git push origin "v$VERSION"
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

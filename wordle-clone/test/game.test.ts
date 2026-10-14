@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ANSWERS, DEFAULT_STATS, GUESSES, MODES, clue, evaluate, hardModeMessage, hint, isValidWord, makeRound, orderedAnswers, status, updateStats } from "../src/game/engine.ts";
+import { ANSWERS, DEFAULT_STATS, GUESSES, MODES, clue, createModeCategoryProgress, evaluate, hardModeMessage, hint, isValidWord, makeRound, orderedAnswers, status, updateStats } from "../src/game/engine.ts";
 const commonWords = ["HAPPY","ABOUT","ABOVE","ADEPT","AFTER","AGAIN","ALIVE","APPLE","BEACH","BRAIN","BREAD","BRING","BROKE","CARRY","CHAIR","CHILD","CLEAN","CLOUD","DANCE","DREAM","EARTH","ENJOY","EVERY","FIRST","FRUIT","GLASS","GRASS","GREEN","GROUP","HONEY","HORSE","HOUSE","IMAGE","JUICE","LEARN","LEMON","LIGHT","MONEY","MUSIC","NIGHT","OCEAN","PARTY","PEACE","PHONE","PLANT","RIVER","SHEEP","SMILE","STONE","TABLE","WATER"];
 test("word policy includes AROSE, BROKE, plurals and -ed",()=>{ for(const word of ["AROSE","BROKE","ROSES","BAKED"]) assert.ok(isValidWord(word)); assert.ok(GUESSES.has("AROSE")); });
 test("evaluation handles duplicate letters",()=>assert.deepEqual(evaluate("AROSE","SHEEP"),["present","absent","present","absent","absent"]));
@@ -14,4 +14,5 @@ test("South Africa category has 100 valid five-letter answers",()=>{const answer
 test("Psychology category has 100 valid five-letter answers",()=>{const answers=ANSWERS.psychology;assert.equal(answers.length,100);for(const answer of answers)assert.equal(isValidWord(answer),true,answer);});
 test("every category supplies 100 valid five-letter Candordles",()=>{for(const answers of Object.values(ANSWERS)){assert.equal(answers.length,100);for(const answer of answers)assert.equal(isValidWord(answer),true,answer);}});
 test("a seed creates a stable, non-repeating category order",()=>{const first=orderedAnswers("psychology",12345);assert.deepEqual(first,orderedAnswers("psychology",12345));assert.equal(new Set(first).size,ANSWERS.psychology.length);assert.notDeepEqual(first,orderedAnswers("psychology",67890));});
+test("each game mode has independent category progress",()=>{const progress=createModeCategoryProgress();progress.classic.nature.played=1;assert.equal(progress.speed.nature.played,0);assert.equal(progress.two.nature.played,0);});
 test("extensive dictionary accepts HAPPY and 50 common five-letter words",()=>{ for (const word of commonWords) assert.equal(isValidWord(word),true,word); });

@@ -7,6 +7,7 @@ export interface Settings { hard: boolean; sound: boolean; clues: boolean; }
 export interface Round { answer: string; guesses: string[]; mode: Mode; theme: Theme; deadline: number | null; hintUsed: boolean; started: boolean; hardMode: boolean; }
 export interface Statistics { wins: number; losses: number; streak: number; bestStreak: number; bestSpeedSeconds: number | null; }
 export interface CategoryProgress { played: number; won: number; lost: number; completed: number; allHardCompleted: boolean; }
+export type ModeCategoryProgress = Record<Mode, Record<Theme, CategoryProgress>>;
 function toHundred(words: string[]) {
   return [...words, ...[...FIVE_LETTER_WORDS].filter((word) => !words.includes(word))].slice(0, 100);
 }
@@ -44,6 +45,9 @@ export const DEFAULT_STATS: Statistics = { wins: 0, losses: 0, streak: 0, bestSt
 export function createSeed() { return Math.floor(Math.random() * 0x7fffffff); }
 export function createCategoryProgress(): Record<Theme, CategoryProgress> {
   return Object.fromEntries((Object.keys(ANSWERS) as Theme[]).map((theme) => [theme, { played: 0, won: 0, lost: 0, completed: 0, allHardCompleted: false }])) as Record<Theme, CategoryProgress>;
+}
+export function createModeCategoryProgress(): ModeCategoryProgress {
+  return Object.fromEntries((Object.keys(MODES) as Mode[]).map((mode) => [mode, createCategoryProgress()])) as ModeCategoryProgress;
 }
 function hash(text: string) { return [...text].reduce((value, character) => ((value * 31) + character.charCodeAt(0)) >>> 0, 2166136261); }
 export function orderedAnswers(theme: Theme, seed: number) {
