@@ -2,7 +2,7 @@
 <a href="docs/samuel-asher-rivello-banner.png"><img src="docs/samuel-asher-rivello-banner.png" width="640" alt="Banner" /></a>
 <BR>
 
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/SamuelAsherRivello/babylon-lite-wordle-game-clone/deploy-pages.yml?label=GitHub%20Actions)](https://github.com/SamuelAsherRivello/babylon-lite-wordle-game-clone/actions)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/SamuelAsherRivello/babylon-lite-candordle/deploy-pages.yml?label=GitHub%20Actions)](https://github.com/SamuelAsherRivello/babylon-lite-candordle/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![OpenSpec](https://img.shields.io/badge/OpenSpec-enabled-6B46C1)](https://github.com/Fission-AI/OpenSpec)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
@@ -10,6 +10,8 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 
 # Candordle
+
+[![Candordle logo in navy lettering over cream, green and yellow rounded word tiles](docs/images/game-logo.png)](docs/game-branding.md)
 
 An original, tactile five-letter word game with accessible controls, local progress, and three replayable puzzle modes.
 
@@ -34,11 +36,11 @@ Persist local progress and settings. Build with React, TypeScript, Vite, and Bab
 
 ## Live Demo
 
-- [Play Candordle](https://samuelasherrivello.github.io/babylon-lite-wordle-game-clone/)
+- [Play Candordle](https://samuelasherrivello.github.io/babylon-lite-candordle/)
 
 ## Images
 
-<a href="docs/screenshot01.png"><img src="docs/screenshot01.png" width="640" alt="Wordle Clone screenshot placeholder" /></a>
+<a href="docs/screenshot01.png"><img src="docs/screenshot01.png" width="640" alt="Legacy template screenshot retained for historical reference" /></a>
 
 ## Table of Contents
 
