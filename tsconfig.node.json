@@ -12,7 +12,8 @@
     "lib": [
       "ES2022",
       "DOM"
-    ]
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": [
     "vite.config.ts",

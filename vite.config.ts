@@ -28,7 +28,7 @@ function versionAsset() {
 }
 
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? "/babylon-lite-wordle-game-clone/" : "/",
+  base: process.env.GITHUB_ACTIONS ? "/babylon-lite-candordle/" : "/",
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },

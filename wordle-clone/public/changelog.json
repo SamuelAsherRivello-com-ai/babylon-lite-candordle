@@ -5,7 +5,8 @@
       "Keep round details together in a dedicated info bar, while the game area stays focused on the tiles.",
       "Follow your current turn in Classic and Two-Guess Challenge, or watch the countdown in Speed Wordle.",
       "Play more comfortably on narrow screens with a centered board, consistent tile spacing, and clearer keyboard controls.",
-      "Candordle now checks its deployed version and release notes, so bookmarked games refresh to the newest release."
+      "Candordle now checks its deployed version and release notes, so bookmarked games refresh to the newest release.",
+      "Candordle loads again from its current web address, including when played inside Web Game Development."
     ]
   },
   {
