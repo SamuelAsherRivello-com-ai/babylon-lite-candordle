@@ -243,6 +243,11 @@ export function App() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (startOpen || settingsOpen || progressOpen || whatsNewOpen || clearConfirm || quitConfirm || resultOpen) return;
       const key = event.key.toUpperCase();
+      if (key === "ENTER") {
+        const target = event.target;
+        if (target instanceof HTMLElement && target.closest("button, input, select, textarea, a") && !target.closest(".keyboard")) return;
+        event.preventDefault();
+      }
       if (devMode && key === "T") triggerCelebration();
       if (devMode && key === "Y") triggerLoss();
       else if (key === "ENTER") submit();

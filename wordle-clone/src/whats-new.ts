@@ -1,7 +1,7 @@
 export const latestReleaseNotes = {
-  "version": "V 0.0.15",
+  "version": "V 0.0.16",
   "items": [
-    "Enjoy Candordle’s refreshed frame and patterned background.",
-    "See your remaining time and progress more clearly during Speed Wordle."
+    "Use the physical Enter key reliably after choosing letters on the on-screen keyboard.",
+    "Enjoy updated spacing for the board, clues, and keyboard."
   ]
 };

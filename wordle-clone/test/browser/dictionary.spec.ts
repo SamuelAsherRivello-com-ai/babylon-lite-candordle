@@ -36,6 +36,10 @@ test("the start menu remembers round choices and quitting returns to it", async 
   await page.getByRole("button", { name: "Quit current round", exact: true }).click();
   await page.getByRole("button", { name: "Quit round", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Candordle start menu" })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem("wordle-clone.v1") ?? "{}");
+    return { guesses: saved.round?.guesses?.length, played: saved.progress?.speed?.nature?.played, won: saved.progress?.speed?.nature?.won, lost: saved.progress?.speed?.nature?.lost };
+  })).toEqual({ guesses: 0, played: 0, won: 0, lost: 0 });
   await expect(page.getByRole("combobox", { name: "Mode" })).toHaveValue("speed");
   await expect(page.getByRole("combobox", { name: "Category" })).toHaveValue("nature");
   await page.reload();
