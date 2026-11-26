@@ -3,10 +3,15 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { latestReleaseNotes } from "./wordle-clone/src/whats-new.ts";
 
 const repositoryRoot = dirname(fileURLToPath(import.meta.url));
 const version = readFileSync(resolve(repositoryRoot, "version.txt"), "utf8").trim().replace("version=", "");
 const versionAssetName = "version.txt";
+const changelog: unknown = JSON.parse(readFileSync(resolve(repositoryRoot, "wordle-clone/public/changelog.json"), "utf8"));
+if (latestReleaseNotes.version !== `V ${version}` || !Array.isArray(changelog) || JSON.stringify(changelog[0]) !== JSON.stringify(latestReleaseNotes)) {
+  throw new Error("Latest release notes must match version.txt and changelog.json");
+}
 
 function versionAsset() {
   return {
